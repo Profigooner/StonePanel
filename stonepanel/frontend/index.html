@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StonePanel</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-page" class="login-page">
+    <div class="login-card">
+        <h1 class="login-title">StonePanel</h1>
+        <p class="login-sub" id="login-subtitle">Server Management Panel</p>
+        <form id="login-form" autocomplete="off">
+            <input type="password" id="password-input" placeholder="Password" required>
+            <button type="submit" class="btn btn-primary btn-block" id="login-btn">Login</button>
+        </form>
+        <p id="login-error" class="error-text hidden"></p>
+    </div>
+</div>
+
+<!-- App Shell -->
+<div id="app" class="app hidden">
+    <nav class="sidebar">
+        <div class="sidebar-brand">StonePanel</div>
+        <ul class="nav-list">
+            <li class="nav-item active" data-page="dashboard"><span class="ni">&#9642;</span> Dashboard</li>
+            <li class="nav-item" data-page="terminal"><span class="ni">&gt;_</span> Terminal</li>
+            <li class="nav-item" data-page="files"><span class="ni">&#9776;</span> Files</li>
+            <li class="nav-item" data-page="screen"><span class="ni">&#9655;</span> Screen</li>
+            <li class="nav-item" data-page="proxy"><span class="ni">&#8644;</span> Proxy</li>
+            <li class="nav-item" data-page="waf"><span class="ni">&#9888;</span> WAF</li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="btn btn-sm btn-block" id="logout-btn">Logout</button>
+        </div>
+    </nav>
+
+    <div class="main-wrap">
+        <header class="topbar">
+            <span id="header-hostname"></span>
+            <span id="header-uptime" class="text-muted"></span>
+        </header>
+
+        <!-- Dashboard -->
+        <div id="page-dashboard" class="page-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">CPU</div>
+                    <div class="stat-value" id="cpu-value">--</div>
+                    <div class="gauge-bar"><div class="gauge-fill" id="cpu-gauge"></div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Memory</div>
+                    <div class="stat-value" id="mem-value">--</div>
+                    <div class="gauge-bar"><div class="gauge-fill" id="mem-gauge"></div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Disk</div>
+                    <div class="stat-value" id="disk-value">--</div>
+                    <div class="gauge-bar"><div class="gauge-fill" id="disk-gauge"></div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Network</div>
+                    <div class="stat-value" id="net-up">--</div>
+                    <div class="stat-sub" id="net-down">--</div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><h3>System</h3></div>
+                <div class="info-grid" id="sys-info"></div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>Top Processes</h3>
+                    <div class="btn-group">
+                        <button class="btn btn-xs active" id="sort-cpu">CPU</button>
+                        <button class="btn btn-xs" id="sort-mem">MEM</button>
+                    </div>
+                </div>
+                <table class="data-table" id="proc-table">
+                    <thead><tr><th>PID</th><th>Name</th><th>CPU%</th><th>MEM%</th><th>User</th><th>Status</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Terminal -->
+        <div id="page-terminal" class="page-content hidden">
+            <div class="term-bar">
+                <div class="term-tabs" id="term-tabs"></div>
+                <button class="btn btn-xs btn-primary" id="new-term-btn">+ New</button>
+            </div>
+            <div class="term-viewport" id="term-viewport">
+                <div class="placeholder">Create a terminal to get started</div>
+            </div>
+        </div>
+
+        <!-- Files -->
+        <div id="page-files" class="page-content hidden">
+            <div class="panel files-panel" id="files-panel">
+                <div class="file-toolbar">
+                    <div class="path-bar" id="breadcrumb"></div>
+                    <div class="file-actions">
+                        <button class="btn btn-sm btn-primary" id="upload-btn">Upload</button>
+                        <span class="action-divider"></span>
+                        <button class="btn btn-sm" id="mkdir-btn">New Folder</button>
+                        <button class="btn btn-sm" id="mkfile-btn">New File</button>
+                    </div>
+                </div>
+                <input type="file" id="file-input" class="hidden" multiple>
+                <div class="file-table-wrap">
+                    <table class="data-table" id="file-table">
+                        <thead><tr>
+                            <th class="col-name">Name</th>
+                            <th class="col-size">Size</th>
+                            <th class="col-date">Modified</th>
+                            <th class="col-perm">Permissions</th>
+                            <th class="col-act"></th>
+                        </tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="file-empty hidden" id="file-empty">
+                    <div class="empty-icon">~</div>
+                    <p>This directory is empty</p>
+                    <p class="text-muted">Drop files here or click Upload</p>
+                </div>
+                <div class="drop-overlay hidden" id="drop-overlay">Drop files to upload</div>
+            </div>
+        </div>
+
+        <!-- Screen / Tmux -->
+        <div id="page-screen" class="page-content hidden">
+            <div class="page-toolbar">
+                <h3>Screen / Tmux Sessions</h3>
+                <div class="toolbar-right">
+                    <span class="tools-status" id="screen-tools-status"></span>
+                    <button class="btn btn-sm" id="screen-refresh-btn">Refresh</button>
+                    <button class="btn btn-sm btn-primary" id="screen-new-btn">+ New Session</button>
+                </div>
+            </div>
+            <div class="panel">
+                <table class="data-table" id="screen-table">
+                    <thead><tr>
+                        <th>Name</th>
+                        <th style="width:90px">Type</th>
+                        <th style="width:100px">Status</th>
+                        <th style="width:80px">Windows</th>
+                        <th style="width:100px">Created</th>
+                        <th class="col-act"></th>
+                    </tr></thead>
+                    <tbody></tbody>
+                </table>
+                <div class="file-empty hidden" id="screen-empty">
+                    <div class="empty-icon">~</div>
+                    <p>No active sessions</p>
+                    <p class="text-muted">Create a screen or tmux session to get started</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen create modal -->
+        <div id="screen-create-overlay" class="overlay hidden">
+            <div class="modal" style="width:460px">
+                <div class="modal-head">
+                    <span>New Session</span>
+                    <button class="modal-x" id="screen-create-close">&times;</button>
+                </div>
+                <form id="screen-create-form" class="modal-body-form">
+                    <label class="form-label">Type</label>
+                    <div class="btn-group" id="screen-type-group" style="margin-bottom:14px">
+                        <button type="button" class="btn btn-sm active" data-type="screen">screen</button>
+                        <button type="button" class="btn btn-sm" data-type="tmux">tmux</button>
+                    </div>
+                    <label class="form-label">Session Name</label>
+                    <input type="text" id="screen-name-input" class="form-input" placeholder="my-session" required>
+                    <label class="form-label">Command <span class="text-muted">(optional)</span></label>
+                    <input type="text" id="screen-cmd-input" class="form-input" placeholder="e.g. python3 app.py">
+                    <div class="modal-foot" style="padding:16px 0 0;border:none">
+                        <button type="button" class="btn btn-sm" id="screen-create-cancel">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Proxy -->
+        <div id="page-proxy" class="page-content hidden">
+            <div class="page-tabs">
+                <button class="page-tab active" data-tab="proxy-rules">Rules</button>
+                <button class="page-tab" data-tab="proxy-caddy">Caddy</button>
+            </div>
+
+            <div id="proxy-rules" class="tab-pane">
+                <div class="page-toolbar">
+                    <h3>Proxy Rules</h3>
+                    <button class="btn btn-sm btn-primary" id="proxy-add-btn">+ Add Rule</button>
+                </div>
+                <div class="panel">
+                    <table class="data-table" id="proxy-table">
+                        <thead><tr>
+                            <th>Name</th>
+                            <th>Protocol</th>
+                            <th>Listen</th>
+                            <th>Domain</th>
+                            <th>Upstreams</th>
+                            <th>Health</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr></thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="empty-state hidden" id="proxy-empty">
+                        <div class="empty-icon">&#8644;</div>
+                        <p>No proxy rules configured</p>
+                        <p class="text-muted">Add a rule to route traffic to your servers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="proxy-caddy" class="tab-pane hidden">
+                <div class="page-toolbar"><h3>Caddy Server</h3></div>
+                <div class="stats-grid stats-grid-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Installed</div>
+                        <div class="stat-value" id="caddy-installed">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Running</div>
+                        <div class="stat-value" id="caddy-running">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Version</div>
+                        <div class="stat-value" id="caddy-version">--</div>
+                    </div>
+                </div>
+                <div class="btn-group" style="margin-top:16px">
+                    <button class="btn btn-sm btn-primary" id="caddy-start-btn">Start Caddy</button>
+                    <button class="btn btn-sm btn-danger" id="caddy-stop-btn">Stop Caddy</button>
+                    <button class="btn btn-sm" id="caddy-apply-btn">Apply Config</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- WAF -->
+        <div id="page-waf" class="page-content hidden">
+            <div class="page-tabs">
+                <button class="page-tab active" data-tab="waf-dashboard">Dashboard</button>
+                <button class="page-tab" data-tab="waf-rules">Rules</button>
+                <button class="page-tab" data-tab="waf-iplists">IP Lists</button>
+                <button class="page-tab" data-tab="waf-ratelimit">Rate Limit</button>
+                <button class="page-tab" data-tab="waf-geo">Geo</button>
+                <button class="page-tab" data-tab="waf-logs">Logs</button>
+            </div>
+
+            <!-- WAF Dashboard -->
+            <div id="waf-dashboard" class="tab-pane">
+                <div class="page-toolbar">
+                    <h3>WAF Overview</h3>
+                    <div class="btn-group">
+                        <span class="badge" id="waf-mode-badge">--</span>
+                        <button class="btn btn-xs" id="waf-toggle-btn">Enable</button>
+                    </div>
+                </div>
+                <div class="stats-grid stats-grid-4">
+                    <div class="stat-card">
+                        <div class="stat-label">Blocked (24h)</div>
+                        <div class="stat-value" id="waf-blocked-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Rules</div>
+                        <div class="stat-value" id="waf-rules-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Blacklisted IPs</div>
+                        <div class="stat-value" id="waf-blacklist-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">OWASP Rules</div>
+                        <div class="stat-value" id="waf-owasp-count">0</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h3>Top Attacking IPs</h3></div>
+                    <table class="data-table" id="waf-top-ips">
+                        <thead><tr><th>IP Address</th><th>Attacks</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h3>Recent Attacks</h3></div>
+                    <table class="data-table" id="waf-recent-attacks">
+                        <thead><tr><th>Time</th><th>Source IP</th><th>URL</th><th>Rule</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- WAF Rules -->
+            <div id="waf-rules" class="tab-pane hidden">
+                <div class="page-toolbar">
+                    <h3>WAF Rules</h3>
+                    <button class="btn btn-sm btn-primary" id="waf-add-rule-btn">+ Add Rule</button>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h3>OWASP Rules</h3></div>
+                    <table class="data-table" id="waf-owasp-table">
+                        <thead><tr><th>Name</th><th>Category</th><th>Action</th><th>Status</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="panel" style="margin-top:16px">
+                    <div class="panel-header"><h3>Custom Rules</h3></div>
+                    <table class="data-table" id="waf-custom-table">
+                        <thead><tr><th>Name</th><th>Priority</th><th>Conditions</th><th>Action</th><th></th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="empty-state hidden" id="waf-custom-empty">
+                        <p class="text-muted">No custom rules defined</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IP Lists -->
+            <div id="waf-iplists" class="tab-pane hidden">
+                <div class="page-toolbar">
+                    <h3>IP Lists</h3>
+                </div>
+                <div class="ip-lists-grid">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Whitelist</h3>
+                            <button class="btn btn-xs btn-primary" id="waf-add-whitelist-btn">+ Add</button>
+                        </div>
+                        <table class="data-table" id="waf-whitelist-table">
+                            <thead><tr><th>Address</th><th>Note</th><th></th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Blacklist</h3>
+                            <button class="btn btn-xs btn-primary" id="waf-add-blacklist-btn">+ Add</button>
+                        </div>
+                        <table class="data-table" id="waf-blacklist-table">
+                            <thead><tr><th>Address</th><th>Note</th><th></th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rate Limit -->
+            <div id="waf-ratelimit" class="tab-pane hidden">
+                <div class="page-toolbar">
+                    <h3>Rate Limiting</h3>
+                    <button class="btn btn-sm btn-primary" id="waf-add-ratelimit-btn">+ Add Rule</button>
+                </div>
+                <div class="panel">
+                    <table class="data-table" id="waf-ratelimit-table">
+                        <thead><tr><th>Name</th><th>Scope</th><th>Limit</th><th>Window</th><th>Block Duration</th><th></th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="empty-state hidden" id="waf-ratelimit-empty">
+                        <p class="text-muted">No rate limit rules defined</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Geo -->
+            <div id="waf-geo" class="tab-pane hidden">
+                <div class="page-toolbar">
+                    <h3>Geo-Blocking</h3>
+                    <button class="btn btn-sm btn-primary" id="waf-add-geo-btn">+ Add Rule</button>
+                </div>
+                <div class="panel">
+                    <table class="data-table" id="waf-geo-table">
+                        <thead><tr><th>Countries</th><th>Mode</th><th>Action</th><th></th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="empty-state hidden" id="waf-geo-empty">
+                        <p class="text-muted">No geo-blocking rules defined</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs -->
+            <div id="waf-logs" class="tab-pane hidden">
+                <div class="page-toolbar">
+                    <h3>Attack Logs</h3>
+                    <div class="log-filters">
+                        <input type="text" id="waf-log-ip" placeholder="Filter by IP" class="input-sm">
+                        <select id="waf-log-category" class="input-sm">
+                            <option value="">All Categories</option>
+                            <option value="owasp">OWASP</option>
+                            <option value="custom">Custom</option>
+                            <option value="bot">Bot</option>
+                            <option value="rate_limit">Rate Limit</option>
+                            <option value="ip_blacklist">IP Blacklist</option>
+                        </select>
+                        <button class="btn btn-xs" id="waf-log-refresh">Refresh</button>
+                    </div>
+                </div>
+                <div class="panel">
+                    <table class="data-table" id="waf-log-table">
+                        <thead><tr><th>Time</th><th>Source IP</th><th>Method</th><th>URL</th><th>Rule</th><th>Category</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="empty-state hidden" id="waf-log-empty">
+                        <p class="text-muted">No attack logs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Editor modal -->
+<div id="editor-overlay" class="overlay hidden">
+    <div class="modal modal-lg">
+        <div class="modal-head">
+            <span id="editor-title">Edit</span>
+            <button class="modal-x" id="editor-close">&times;</button>
+        </div>
+        <textarea id="editor-area" class="editor-area" spellcheck="false"></textarea>
+        <div class="modal-foot">
+            <button class="btn btn-sm" id="editor-cancel">Cancel</button>
+            <button class="btn btn-sm btn-primary" id="editor-save">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Proxy rule modal -->
+<div id="proxy-modal" class="overlay hidden">
+    <div class="modal">
+        <div class="modal-head">
+            <span id="proxy-modal-title">Add Proxy Rule</span>
+            <button class="modal-x" id="proxy-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="proxy-edit-id">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" id="proxy-name" class="input-full" placeholder="My Web App">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Protocol</label>
+                    <select id="proxy-protocol" class="input-full">
+                        <option value="http">HTTP</option>
+                        <option value="https">HTTPS</option>
+                        <option value="tcp">TCP</option>
+                        <option value="udp">UDP</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Listen Port</label>
+                    <input type="number" id="proxy-port" class="input-full" value="80">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Domain <span class="text-muted">(optional, for HTTP)</span></label>
+                <input type="text" id="proxy-domain" class="input-full" placeholder="app.example.com">
+            </div>
+            <div class="form-group">
+                <label>Path Prefix</label>
+                <input type="text" id="proxy-path" class="input-full" value="/">
+            </div>
+            <div class="form-group">
+                <label>Upstreams</label>
+                <div id="proxy-upstreams-list"></div>
+                <button class="btn btn-xs" id="proxy-add-upstream" type="button">+ Add Upstream</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Load Balance</label>
+                    <select id="proxy-lb" class="input-full">
+                        <option value="round_robin">Round Robin</option>
+                        <option value="least_conn">Least Connections</option>
+                        <option value="ip_hash">IP Hash</option>
+                        <option value="random">Random</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>WAF</label>
+                    <select id="proxy-waf" class="input-full">
+                        <option value="true">Enabled</option>
+                        <option value="false">Disabled</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-sm" id="proxy-modal-cancel">Cancel</button>
+            <button class="btn btn-sm btn-primary" id="proxy-modal-save">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- WAF rule modal -->
+<div id="waf-rule-modal" class="overlay hidden">
+    <div class="modal">
+        <div class="modal-head">
+            <span id="waf-rule-modal-title">Add WAF Rule</span>
+            <button class="modal-x" id="waf-rule-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="waf-rule-edit-id">
+            <div class="form-row">
+                <div class="form-group" style="flex:2">
+                    <label>Name</label>
+                    <input type="text" id="waf-rule-name" class="input-full" placeholder="Block admin access">
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <input type="number" id="waf-rule-priority" class="input-full" value="100">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Action</label>
+                <select id="waf-rule-action" class="input-full">
+                    <option value="block">Block</option>
+                    <option value="allow">Allow</option>
+                    <option value="log">Log Only</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Conditions</label>
+                <div id="waf-conditions-list"></div>
+                <button class="btn btn-xs" id="waf-add-condition" type="button">+ Add Condition</button>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-sm" id="waf-rule-modal-cancel">Cancel</button>
+            <button class="btn btn-sm btn-primary" id="waf-rule-modal-save">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toasts -->
+<div id="toasts" class="toast-wrap"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/dashboard.js"></script>
+<script src="/static/js/terminal.js"></script>
+<script src="/static/js/filemanager.js"></script>
+<script src="/static/js/screen.js"></script>
+<script src="/static/js/proxy.js"></script>
+<script src="/static/js/waf.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

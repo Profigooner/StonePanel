@@ -1,0 +1,158 @@
+[
+  {
+    "id": "owasp-sqli-001",
+    "name": "SQL Injection - UNION SELECT",
+    "enabled": true,
+    "priority": 10,
+    "conditions": [
+      {"target": "query", "operator": "regex", "value": "(?i)(union\\s+(all\\s+)?select)", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "owasp",
+    "description": "Detects UNION SELECT SQL injection attempts"
+  },
+  {
+    "id": "owasp-sqli-002",
+    "name": "SQL Injection - Boolean Logic",
+    "enabled": true,
+    "priority": 10,
+    "conditions": [
+      {"target": "query", "operator": "regex", "value": "(?i)(\\bor\\b\\s+\\d+\\s*=\\s*\\d+|\\band\\b\\s+\\d+\\s*=\\s*\\d+|'\\s*or\\s*')", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "owasp",
+    "description": "Detects boolean-based SQL injection (OR 1=1, AND 1=1)"
+  },
+  {
+    "id": "owasp-sqli-003",
+    "name": "SQL Injection - Comment & Drop",
+    "enabled": true,
+    "priority": 10,
+    "conditions": [
+      {"target": "query", "operator": "regex", "value": "(?i)(--\\s|/\\*|\\*/|;\\s*(drop|alter|truncate|delete|insert|update)\\s)", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "owasp",
+    "description": "Detects SQL comment injection and destructive statements"
+  },
+  {
+    "id": "owasp-xss-001",
+    "name": "XSS - Script Tag",
+    "enabled": true,
+    "priority": 10,
+    "conditions": [
+      {"target": "query", "operator": "regex", "value": "(?i)(<\\s*script[^>]*>|<\\s*/\\s*script\\s*>)", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "owasp",
+    "description": "Detects script tag injection"
+  },
+  {
+    "id": "owasp-xss-002",
+    "name": "XSS - Event Handlers",
+    "enabled": true,
+    "priority": 10,
+    "conditions": [
+      {"target": "query", "operator": "regex", "value": "(?i)(on(error|load|click|mouseover|focus|blur|submit|change|input)\\s*=)", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "owasp",
+    "description": "Detects inline event handler injection"
+  },
+  {
+    "id": "owasp-xss-003",
+    "name": "XSS - JavaScript Protocol",
+    "enabled": true,
+    "priority": 10,
+    "conditions": [
+      {"target": "query", "operator": "regex", "value": "(?i)(javascript\\s*:|vbscript\\s*:|data\\s*:text/html)", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "owasp",
+    "description": "Detects javascript: and vbscript: protocol injection"
+  },
+  {
+    "id": "owasp-path-001",
+    "name": "Path Traversal",
+    "enabled": true,
+    "priority": 10,
+    "conditions": [
+      {"target": "url", "operator": "regex", "value": "(\\.\\./|\\.\\.\\\\|%2e%2e%2f|%2e%2e/|\\.\\.%2f|%2e%2e%5c)", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "owasp",
+    "description": "Detects directory traversal attempts"
+  },
+  {
+    "id": "owasp-path-002",
+    "name": "Sensitive File Access",
+    "enabled": true,
+    "priority": 10,
+    "conditions": [
+      {"target": "url", "operator": "regex", "value": "(?i)(/etc/passwd|/etc/shadow|/proc/self|wp-config\\.php|\\.env$|\\.git/)", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "owasp",
+    "description": "Detects attempts to access sensitive system files"
+  },
+  {
+    "id": "owasp-cmdi-001",
+    "name": "Command Injection",
+    "enabled": true,
+    "priority": 10,
+    "conditions": [
+      {"target": "query", "operator": "regex", "value": "(?i)(;\\s*(ls|cat|whoami|id|uname|curl|wget|nc|bash|sh|python|perl|ruby)\\b|\\|\\s*(ls|cat|whoami|id)\\b|`[^`]+`|\\$\\([^)]+\\))", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "owasp",
+    "description": "Detects OS command injection via semicolons, pipes, backticks, and $() syntax"
+  },
+  {
+    "id": "owasp-proto-001",
+    "name": "Null Byte Injection",
+    "enabled": true,
+    "priority": 5,
+    "conditions": [
+      {"target": "url", "operator": "contains", "value": "%00", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "owasp",
+    "description": "Detects null byte injection in URLs"
+  },
+  {
+    "id": "owasp-method-001",
+    "name": "Dangerous HTTP Methods",
+    "enabled": true,
+    "priority": 20,
+    "conditions": [
+      {"target": "method", "operator": "regex", "value": "^(TRACE|TRACK|CONNECT)$", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "owasp",
+    "description": "Blocks TRACE, TRACK, and CONNECT HTTP methods"
+  },
+  {
+    "id": "bot-scanner-001",
+    "name": "Scanner Detection",
+    "enabled": true,
+    "priority": 30,
+    "conditions": [
+      {"target": "user_agent", "operator": "regex", "value": "(?i)(sqlmap|nikto|nessus|dirbuster|gobuster|masscan|nmap|nuclei|wpscan|acunetix)", "negate": false}
+    ],
+    "action": "block",
+    "log": true,
+    "category": "bot",
+    "description": "Detects common vulnerability scanner user agents"
+  }
+]
