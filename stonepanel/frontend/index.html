@@ -31,6 +31,8 @@
             <li class="nav-item" data-page="terminal"><span class="ni">&gt;_</span> Terminal</li>
             <li class="nav-item" data-page="files"><span class="ni">&#9776;</span> Files</li>
             <li class="nav-item" data-page="screen"><span class="ni">&#9655;</span> Screen</li>
+            <li class="nav-item" data-page="cron"><span class="ni">&#9200;</span> Cron Jobs</li>
+            <li class="nav-item" data-page="services"><span class="ni">&#9881;</span> Services</li>
             <li class="nav-item" data-page="proxy"><span class="ni">&#8644;</span> Proxy</li>
             <li class="nav-item" data-page="waf"><span class="ni">&#9888;</span> WAF</li>
         </ul>
@@ -185,6 +187,159 @@
                         <button type="submit" class="btn btn-sm btn-primary">Create</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Cron Jobs -->
+        <div id="page-cron" class="page-content hidden">
+            <div class="page-toolbar">
+                <h3>Cron Jobs</h3>
+                <div class="toolbar-right">
+                    <button class="btn btn-sm" id="cron-refresh-btn">Refresh</button>
+                    <button class="btn btn-sm btn-primary" id="cron-add-btn">+ Add Job</button>
+                </div>
+            </div>
+            <div class="panel">
+                <table class="data-table" id="cron-table">
+                    <thead><tr>
+                        <th style="width:60px">Enabled</th>
+                        <th>Schedule</th>
+                        <th>Command</th>
+                        <th>Description</th>
+                        <th class="col-act"></th>
+                    </tr></thead>
+                    <tbody></tbody>
+                </table>
+                <div class="empty-state hidden" id="cron-empty">
+                    <div class="empty-icon">&#9200;</div>
+                    <p>No cron jobs found</p>
+                    <p class="text-muted">Add a cron job to schedule tasks</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cron modal -->
+        <div id="cron-modal" class="overlay hidden">
+            <div class="modal" style="width:520px">
+                <div class="modal-head">
+                    <span id="cron-modal-title">Add Cron Job</span>
+                    <button class="modal-x" id="cron-modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="cron-edit-id">
+                    <div class="form-group">
+                        <label>Preset</label>
+                        <select id="cron-preset" class="input-full">
+                            <option value="custom">Custom</option>
+                            <option value="everymin">Every Minute</option>
+                            <option value="hourly">Hourly</option>
+                            <option value="daily">Daily (midnight)</option>
+                            <option value="weekly">Weekly (Sunday midnight)</option>
+                            <option value="monthly">Monthly (1st, midnight)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Schedule</label>
+                        <div class="cron-fields">
+                            <div class="cron-field">
+                                <input type="text" id="cron-minute" class="input-sm" value="*">
+                                <span class="cron-field-label">Min</span>
+                            </div>
+                            <div class="cron-field">
+                                <input type="text" id="cron-hour" class="input-sm" value="*">
+                                <span class="cron-field-label">Hour</span>
+                            </div>
+                            <div class="cron-field">
+                                <input type="text" id="cron-day" class="input-sm" value="*">
+                                <span class="cron-field-label">Day</span>
+                            </div>
+                            <div class="cron-field">
+                                <input type="text" id="cron-month" class="input-sm" value="*">
+                                <span class="cron-field-label">Month</span>
+                            </div>
+                            <div class="cron-field">
+                                <input type="text" id="cron-weekday" class="input-sm" value="*">
+                                <span class="cron-field-label">Wkday</span>
+                            </div>
+                        </div>
+                        <div class="cron-preview" id="cron-preview">Every minute</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Command</label>
+                        <input type="text" id="cron-command" class="input-full" placeholder="/usr/bin/backup.sh">
+                    </div>
+                    <div class="form-group">
+                        <label>Description <span class="text-muted">(optional)</span></label>
+                        <input type="text" id="cron-description" class="input-full" placeholder="Nightly backup">
+                    </div>
+                </div>
+                <div class="modal-foot">
+                    <button class="btn btn-sm" id="cron-modal-cancel">Cancel</button>
+                    <button class="btn btn-sm btn-primary" id="cron-modal-save">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services -->
+        <div id="page-services" class="page-content hidden">
+            <div class="page-toolbar">
+                <h3>Systemd Services</h3>
+                <div class="toolbar-right">
+                    <select id="svc-state-filter" class="input-sm">
+                        <option value="">All States</option>
+                        <option value="running">Running</option>
+                        <option value="exited">Exited</option>
+                        <option value="failed">Failed</option>
+                        <option value="dead">Dead</option>
+                    </select>
+                    <input type="text" id="svc-search" class="input-sm" placeholder="Search...">
+                    <button class="btn btn-sm" id="svc-refresh-btn">Refresh</button>
+                </div>
+            </div>
+            <div class="panel">
+                <table class="data-table" id="svc-table">
+                    <thead><tr>
+                        <th style="width:40px"></th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th style="width:90px">State</th>
+                        <th class="col-act"></th>
+                    </tr></thead>
+                    <tbody></tbody>
+                </table>
+                <div class="empty-state hidden" id="svc-empty">
+                    <div class="empty-icon">&#9881;</div>
+                    <p>No services found</p>
+                    <p class="text-muted">systemd may not be available</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service detail modal -->
+        <div id="svc-modal" class="overlay hidden">
+            <div class="modal modal-lg">
+                <div class="modal-head">
+                    <span id="svc-modal-title">Service Details</span>
+                    <button class="modal-x" id="svc-modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="svc-detail-info" id="svc-detail-info"></div>
+                    <div class="btn-group" style="margin:12px 0">
+                        <button class="btn btn-xs btn-primary svc-action-btn" data-action="start">Start</button>
+                        <button class="btn btn-xs btn-danger svc-action-btn" data-action="stop">Stop</button>
+                        <button class="btn btn-xs svc-action-btn" data-action="restart">Restart</button>
+                        <button class="btn btn-xs svc-action-btn" data-action="reload">Reload</button>
+                        <button class="btn btn-xs svc-action-btn" data-action="enable">Enable</button>
+                        <button class="btn btn-xs svc-action-btn" data-action="disable">Disable</button>
+                    </div>
+                    <div class="form-group" style="margin-top:8px">
+                        <label>Logs <span class="text-muted" id="svc-log-count"></span></label>
+                        <div class="svc-log-viewer" id="svc-log-viewer"></div>
+                    </div>
+                </div>
+                <div class="modal-foot">
+                    <button class="btn btn-sm" id="svc-modal-done">Close</button>
+                </div>
             </div>
         </div>
 
@@ -551,6 +706,8 @@
 <script src="/static/js/terminal.js"></script>
 <script src="/static/js/filemanager.js"></script>
 <script src="/static/js/screen.js"></script>
+<script src="/static/js/cron.js"></script>
+<script src="/static/js/services.js"></script>
 <script src="/static/js/proxy.js"></script>
 <script src="/static/js/waf.js"></script>
 <script src="/static/js/app.js"></script>

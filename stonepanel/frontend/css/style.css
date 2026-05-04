@@ -694,3 +694,59 @@ select.input-sm {
 
 /* xterm container fill */
 .term-viewport .xterm { height: 100%; }
+
+/* ---- Toggle switch ---- */
+.toggle-switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--border); border-radius: 20px; transition: .2s;
+}
+.toggle-slider::before {
+    content: ""; position: absolute; height: 14px; width: 14px;
+    left: 3px; bottom: 3px; background: var(--text);
+    border-radius: 50%; transition: .2s;
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--green); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+/* ---- Status dot (services table) ---- */
+.status-dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--text-muted);
+}
+.status-dot.dot-green { background: var(--green); }
+.status-dot.dot-red { background: var(--red); }
+.status-dot.dot-gray { background: var(--text-muted); }
+
+/* ---- Cron schedule builder ---- */
+.cron-fields { display: flex; gap: 8px; margin-bottom: 6px; }
+.cron-field { flex: 1; text-align: center; }
+.cron-field input { width: 100%; text-align: center; }
+.cron-field-label { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.cron-preview {
+    font-size: 13px; color: var(--green); padding: 4px 0;
+}
+
+/* ---- Service log viewer ---- */
+.svc-log-viewer {
+    background: var(--bg-body); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 12px; max-height: 300px;
+    overflow-y: auto; font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 12px; line-height: 1.6;
+}
+.log-line { white-space: pre-wrap; word-break: break-all; }
+.log-line.log-error { color: var(--red); }
+.log-line.log-warn { color: var(--yellow); }
+.log-ts { color: var(--text-muted); }
+
+/* ---- Service detail info ---- */
+.svc-detail-info .info-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+}
+.svc-detail-info .info-item { display: flex; gap: 8px; }
+.svc-detail-info .info-label { color: var(--text-muted); min-width: 80px; }
+
+/* ---- Service name link ---- */
+.svc-name-link { color: var(--accent); text-decoration: none; }
+.svc-name-link:hover { text-decoration: underline; }

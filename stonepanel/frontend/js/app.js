@@ -36,6 +36,8 @@ const App = {
         TermMgr.start();
         FileMgr.start();
         ScreenMgr.start();
+        CronMgr.start();
+        ServiceMgr.start();
         ProxyMgr.start();
         WAFMgr.start();
         this.navigate('dashboard');
@@ -48,7 +50,7 @@ const App = {
         });
 
         // Toggle pages
-        var pages = ['dashboard', 'terminal', 'files', 'screen', 'proxy', 'waf'];
+        var pages = ['dashboard', 'terminal', 'files', 'screen', 'cron', 'services', 'proxy', 'waf'];
         for (var i = 0; i < pages.length; i++) {
             var el = document.getElementById('page-' + pages[i]);
             if (pages[i] === page) {
@@ -72,6 +74,12 @@ const App = {
         }
         if (page === 'screen') {
             ScreenMgr.refresh();
+        }
+        if (page === 'cron') {
+            CronMgr.refresh();
+        }
+        if (page === 'services') {
+            ServiceMgr.refresh();
         }
         if (page === 'proxy') {
             ProxyMgr.refresh();

@@ -23,6 +23,8 @@ from .waf.router import router as waf_router
 from .waf.service import WAFService
 from .terminal.manager import TerminalManager
 from .terminal.router import router as terminal_router
+from .cron.router import router as cron_router
+from .services.router import router as services_router
 
 FRONTEND_DIR = Path(__file__).parent / "frontend"
 
@@ -87,6 +89,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(proxy_router)
     app.include_router(waf_router)
     app.include_router(waf_internal_router)
+    app.include_router(cron_router)
+    app.include_router(services_router)
 
     # Serve frontend
     if FRONTEND_DIR.exists():

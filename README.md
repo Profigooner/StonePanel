@@ -146,6 +146,19 @@ pytest tests/ -v
 - [ ] Webhook & API integration -- Expose webhooks for CI/CD pipelines (GitHub/GitLab push-to-deploy), custom automation triggers
 - [ ] Multi-server management -- Manage multiple remote servers from a single StonePanel instance via agent mode
 - [ ] File editor enhancements -- Syntax highlighting (CodeMirror/Monaco), diff view, git status indicators, and in-browser image preview
+- [ ] AI ops assistant -- LLM-powered log analysis, natural language server commands ("restart nginx", "show me failed logins"), anomaly detection and root cause suggestions
+- [ ] Server health score -- Composite score (security, performance, configuration) with actionable optimization recommendations
+- [ ] Collaborative terminal -- Share a live terminal session with teammates (like tmate/pair programming), with view-only and full-control modes
+- [ ] Command snippet library -- Save, tag, and one-click execute frequently used commands; share snippets across team
+- [ ] Process guardian -- Supervisor-like process manager: keep services alive, auto-restart on crash, resource limits, log tailing per process
+- [ ] Security hardening wizard -- Guided SSH hardening, fail2ban setup, unused port closure, kernel parameter tuning, with a before/after security score
+- [ ] Terminal session recording & playback -- Record all terminal sessions as asciinema-style recordings, searchable and replayable for audit and training
+- [ ] Visual network topology -- Auto-discover and render a live map of services, ports, and connections between your servers
+- [ ] Custom dashboard builder -- Drag-and-drop widgets (CPU gauge, log stream, service status, custom shell output) to build personalized monitoring dashboards
+- [ ] Git deployment manager -- View deployed repos, pull/switch branches, view diff since last deploy, one-click rollback to previous commit
+- [ ] Mobile PWA -- Progressive Web App with responsive UI, push notifications, and quick actions optimized for phone screens
+- [ ] Hosts & local DNS management -- Edit /etc/hosts, manage local DNS entries (dnsmasq/CoreDNS) from the UI
+- [ ] Scheduled power management -- Schedule server reboot, shutdown, wake-on-LAN, and maintenance windows with pre/post scripts
 
 ## License
 
