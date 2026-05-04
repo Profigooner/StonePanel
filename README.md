@@ -23,7 +23,7 @@ A lightweight, self-hosted server management panel built with FastAPI. Install i
 ### Install
 
 ```bash
-git clone https://github.com/your-username/StonePanel.git
+git clone https://github.com/Profigooner/StonePanel.git
 cd StonePanel
 python3 -m venv .venv
 source .venv/bin/activate
